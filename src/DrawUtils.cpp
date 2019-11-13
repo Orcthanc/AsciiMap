@@ -294,7 +294,7 @@ const std::string chars[] = {
 	"╬", //11 11 11 11
 };
 
-const std::string dir_to_chars( Wall::Wall dir ){
+const std::string Pathfinder::dir_to_chars( Wall::Wall dir ){
 	return chars[dir];
 }
 

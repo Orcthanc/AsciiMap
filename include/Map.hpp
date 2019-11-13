@@ -57,9 +57,11 @@ namespace Pathfinder {
 			const MapCell& at( uint32_t x, uint32_t y ) const noexcept;
 			MapCell& at( uint32_t x, uint32_t y ) noexcept;
 
+
+
+			uint32_t x_size, y_size;
 		private:
 			MapCell* cells;
-			uint32_t x_size, y_size;
 	};
 
 	struct Map {

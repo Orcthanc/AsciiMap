@@ -35,354 +35,354 @@ namespace Pathfinder {
 		//01 = wall
 		//10 = thick wall
 		//11 = double wall
-#define DIRECTIONS			\
-							\
-DIRECTION( nnnn )			\
-DIRECTION( nnnw )			\
-DIRECTION( nnnt )			\
-DIRECTION( nnnd )			\
-							\
-DIRECTION( nnwn )			\
-DIRECTION( nnww )			\
-DIRECTION( nnwt )			\
-DIRECTION( nnwd )			\
-							\
-DIRECTION( nntn )			\
-DIRECTION( nntw )			\
-DIRECTION( nntt )			\
-DIRECTION( nntd )			\
-							\
-DIRECTION( nndn )			\
-DIRECTION( nndw )			\
-DIRECTION( nndt )			\
-DIRECTION( nndd )			\
-							\
-							\
-DIRECTION( nwnn )			\
-DIRECTION( nwnw )			\
-DIRECTION( nwnt )			\
-DIRECTION( nwnd )			\
-							\
-DIRECTION( nwwn )			\
-DIRECTION( nwww )			\
-DIRECTION( nwwt )			\
-DIRECTION( nwwd )			\
-							\
-DIRECTION( nwtn )			\
-DIRECTION( nwtw )			\
-DIRECTION( nwtt )			\
-DIRECTION( nwtd )			\
-							\
-DIRECTION( nwdn )			\
-DIRECTION( nwdw )			\
-DIRECTION( nwdt )			\
-DIRECTION( nwdd )			\
-							\
-							\
-DIRECTION( ntnn )			\
-DIRECTION( ntnw )			\
-DIRECTION( ntnt )			\
-DIRECTION( ntnd )			\
-							\
-DIRECTION( ntwn )			\
-DIRECTION( ntww )			\
-DIRECTION( ntwt )			\
-DIRECTION( ntwd )			\
-							\
-DIRECTION( nttn )			\
-DIRECTION( nttw )			\
-DIRECTION( nttt )			\
-DIRECTION( nttd )			\
-							\
-DIRECTION( ntdn )			\
-DIRECTION( ntdw )			\
-DIRECTION( ntdt )			\
-DIRECTION( ntdd )			\
-							\
-							\
-DIRECTION( ndnn )			\
-DIRECTION( ndnw )			\
-DIRECTION( ndnt )			\
-DIRECTION( ndnd )			\
-							\
-DIRECTION( ndwn )			\
-DIRECTION( ndww )			\
-DIRECTION( ndwt )			\
-DIRECTION( ndwd )			\
-							\
-DIRECTION( ndtn )			\
-DIRECTION( ndtw )			\
-DIRECTION( ndtt )			\
-DIRECTION( ndtd )			\
-							\
-DIRECTION( nddn )			\
-DIRECTION( nddw )			\
-DIRECTION( nddt )			\
-DIRECTION( nddd )			\
-							\
-							\
-							\
-							\
-DIRECTION( wnnn )			\
-DIRECTION( wnnw )			\
-DIRECTION( wnnt )			\
-DIRECTION( wnnd )			\
-							\
-DIRECTION( wnwn )			\
-DIRECTION( wnww )			\
-DIRECTION( wnwt )			\
-DIRECTION( wnwd )			\
-							\
-DIRECTION( wntn )			\
-DIRECTION( wntw )			\
-DIRECTION( wntt )			\
-DIRECTION( wntd )			\
-							\
-DIRECTION( wndn )			\
-DIRECTION( wndw )			\
-DIRECTION( wndt )			\
-DIRECTION( wndd )			\
-							\
-							\
-DIRECTION( wwnn )			\
-DIRECTION( wwnw )			\
-DIRECTION( wwnt )			\
-DIRECTION( wwnd )			\
-							\
-DIRECTION( wwwn )			\
-DIRECTION( wwww )			\
-DIRECTION( wwwt )			\
-DIRECTION( wwwd )			\
-							\
-DIRECTION( wwtn )			\
-DIRECTION( wwtw )			\
-DIRECTION( wwtt )			\
-DIRECTION( wwtd )			\
-							\
-DIRECTION( wwdn )			\
-DIRECTION( wwdw )			\
-DIRECTION( wwdt )			\
-DIRECTION( wwdd )			\
-							\
-							\
-DIRECTION( wtnn )			\
-DIRECTION( wtnw )			\
-DIRECTION( wtnt )			\
-DIRECTION( wtnd )			\
-							\
-DIRECTION( wtwn )			\
-DIRECTION( wtww )			\
-DIRECTION( wtwt )			\
-DIRECTION( wtwd )			\
-							\
-DIRECTION( wttn )			\
-DIRECTION( wttw )			\
-DIRECTION( wttt )			\
-DIRECTION( wttd )			\
-							\
-DIRECTION( wtdn )			\
-DIRECTION( wtdw )			\
-DIRECTION( wtdt )			\
-DIRECTION( wtdd )			\
-							\
-							\
-DIRECTION( wdnn )			\
-DIRECTION( wdnw )			\
-DIRECTION( wdnt )			\
-DIRECTION( wdnd )			\
-							\
-DIRECTION( wdwn )			\
-DIRECTION( wdww )			\
-DIRECTION( wdwt )			\
-DIRECTION( wdwd )			\
-							\
-DIRECTION( wdtn )			\
-DIRECTION( wdtw )			\
-DIRECTION( wdtt )			\
-DIRECTION( wdtd )			\
-							\
-DIRECTION( wddn )			\
-DIRECTION( wddw )			\
-DIRECTION( wddt )			\
-DIRECTION( wddd )			\
-							\
-							\
-							\
-							\
-DIRECTION( tnnn )			\
-DIRECTION( tnnw )			\
-DIRECTION( tnnt )			\
-DIRECTION( tnnd )			\
-							\
-DIRECTION( tnwn )			\
-DIRECTION( tnww )			\
-DIRECTION( tnwt )			\
-DIRECTION( tnwd )			\
-							\
-DIRECTION( tntn )			\
-DIRECTION( tntw )			\
-DIRECTION( tntt )			\
-DIRECTION( tntd )			\
-							\
-DIRECTION( tndn )			\
-DIRECTION( tndw )			\
-DIRECTION( tndt )			\
-DIRECTION( tndd )			\
-							\
-							\
-DIRECTION( twnn )			\
-DIRECTION( twnw )			\
-DIRECTION( twnt )			\
-DIRECTION( twnd )			\
-							\
-DIRECTION( twwn )			\
-DIRECTION( twww )			\
-DIRECTION( twwt )			\
-DIRECTION( twwd )			\
-							\
-DIRECTION( twtn )			\
-DIRECTION( twtw )			\
-DIRECTION( twtt )			\
-DIRECTION( twtd )			\
-							\
-DIRECTION( twdn )			\
-DIRECTION( twdw )			\
-DIRECTION( twdt )			\
-DIRECTION( twdd )			\
-							\
-							\
-DIRECTION( ttnn )			\
-DIRECTION( ttnw )			\
-DIRECTION( ttnt )			\
-DIRECTION( ttnd )			\
-							\
-DIRECTION( ttwn )			\
-DIRECTION( ttww )			\
-DIRECTION( ttwt )			\
-DIRECTION( ttwd )			\
-							\
-DIRECTION( tttn )			\
-DIRECTION( tttw )			\
-DIRECTION( tttt )			\
-DIRECTION( tttd )			\
-							\
-DIRECTION( ttdn )			\
-DIRECTION( ttdw )			\
-DIRECTION( ttdt )			\
-DIRECTION( ttdd )			\
-							\
-							\
-DIRECTION( tdnn )			\
-DIRECTION( tdnw )			\
-DIRECTION( tdnt )			\
-DIRECTION( tdnd )			\
-							\
-DIRECTION( tdwn )			\
-DIRECTION( tdww )			\
-DIRECTION( tdwt )			\
-DIRECTION( tdwd )			\
-							\
-DIRECTION( tdtn )			\
-DIRECTION( tdtw )			\
-DIRECTION( tdtt )			\
-DIRECTION( tdtd )			\
-							\
-DIRECTION( tddn )			\
-DIRECTION( tddw )			\
-DIRECTION( tddt )			\
-DIRECTION( tddd )			\
-							\
-							\
-							\
-							\
-DIRECTION( dnnn )			\
-DIRECTION( dnnw )			\
-DIRECTION( dnnt )			\
-DIRECTION( dnnd )			\
-							\
-DIRECTION( dnwn )			\
-DIRECTION( dnww )			\
-DIRECTION( dnwt )			\
-DIRECTION( dnwd )			\
-							\
-DIRECTION( dntn )			\
-DIRECTION( dntw )			\
-DIRECTION( dntt )			\
-DIRECTION( dntd )			\
-							\
-DIRECTION( dndn )			\
-DIRECTION( dndw )			\
-DIRECTION( dndt )			\
-DIRECTION( dndd )			\
-							\
-							\
-DIRECTION( dwnn )			\
-DIRECTION( dwnw )			\
-DIRECTION( dwnt )			\
-DIRECTION( dwnd )			\
-							\
-DIRECTION( dwwn )			\
-DIRECTION( dwww )			\
-DIRECTION( dwwt )			\
-DIRECTION( dwwd )			\
-							\
-DIRECTION( dwtn )			\
-DIRECTION( dwtw )			\
-DIRECTION( dwtt )			\
-DIRECTION( dwtd )			\
-							\
-DIRECTION( dwdn )			\
-DIRECTION( dwdw )			\
-DIRECTION( dwdt )			\
-DIRECTION( dwdd )			\
-							\
-							\
-DIRECTION( dtnn )			\
-DIRECTION( dtnw )			\
-DIRECTION( dtnt )			\
-DIRECTION( dtnd )			\
-							\
-DIRECTION( dtwn )			\
-DIRECTION( dtww )			\
-DIRECTION( dtwt )			\
-DIRECTION( dtwd )			\
-							\
-DIRECTION( dttn )			\
-DIRECTION( dttw )			\
-DIRECTION( dttt )			\
-DIRECTION( dttd )			\
-							\
-DIRECTION( dtdn )			\
-DIRECTION( dtdw )			\
-DIRECTION( dtdt )			\
-DIRECTION( dtdd )			\
-							\
-							\
-DIRECTION( ddnn )			\
-DIRECTION( ddnw )			\
-DIRECTION( ddnt )			\
-DIRECTION( ddnd )			\
-							\
-DIRECTION( ddwn )			\
-DIRECTION( ddww )			\
-DIRECTION( ddwt )			\
-DIRECTION( ddwd )			\
-							\
-DIRECTION( ddtn )			\
-DIRECTION( ddtw )			\
-DIRECTION( ddtt )			\
-DIRECTION( ddtd )			\
-							\
-DIRECTION( dddn )			\
-DIRECTION( dddw )			\
-DIRECTION( dddt )			\
-DIRECTION( dddd )
+#define WALLS			\
+						\
+WALL( nnnn )			\
+WALL( nnnw )			\
+WALL( nnnt )			\
+WALL( nnnd )			\
+						\
+WALL( nnwn )			\
+WALL( nnww )			\
+WALL( nnwt )			\
+WALL( nnwd )			\
+						\
+WALL( nntn )			\
+WALL( nntw )			\
+WALL( nntt )			\
+WALL( nntd )			\
+						\
+WALL( nndn )			\
+WALL( nndw )			\
+WALL( nndt )			\
+WALL( nndd )			\
+						\
+						\
+WALL( nwnn )			\
+WALL( nwnw )			\
+WALL( nwnt )			\
+WALL( nwnd )			\
+						\
+WALL( nwwn )			\
+WALL( nwww )			\
+WALL( nwwt )			\
+WALL( nwwd )			\
+						\
+WALL( nwtn )			\
+WALL( nwtw )			\
+WALL( nwtt )			\
+WALL( nwtd )			\
+						\
+WALL( nwdn )			\
+WALL( nwdw )			\
+WALL( nwdt )			\
+WALL( nwdd )			\
+						\
+						\
+WALL( ntnn )			\
+WALL( ntnw )			\
+WALL( ntnt )			\
+WALL( ntnd )			\
+						\
+WALL( ntwn )			\
+WALL( ntww )			\
+WALL( ntwt )			\
+WALL( ntwd )			\
+						\
+WALL( nttn )			\
+WALL( nttw )			\
+WALL( nttt )			\
+WALL( nttd )			\
+						\
+WALL( ntdn )			\
+WALL( ntdw )			\
+WALL( ntdt )			\
+WALL( ntdd )			\
+						\
+						\
+WALL( ndnn )			\
+WALL( ndnw )			\
+WALL( ndnt )			\
+WALL( ndnd )			\
+						\
+WALL( ndwn )			\
+WALL( ndww )			\
+WALL( ndwt )			\
+WALL( ndwd )			\
+						\
+WALL( ndtn )			\
+WALL( ndtw )			\
+WALL( ndtt )			\
+WALL( ndtd )			\
+						\
+WALL( nddn )			\
+WALL( nddw )			\
+WALL( nddt )			\
+WALL( nddd )			\
+						\
+						\
+						\
+						\
+WALL( wnnn )			\
+WALL( wnnw )			\
+WALL( wnnt )			\
+WALL( wnnd )			\
+						\
+WALL( wnwn )			\
+WALL( wnww )			\
+WALL( wnwt )			\
+WALL( wnwd )			\
+						\
+WALL( wntn )			\
+WALL( wntw )			\
+WALL( wntt )			\
+WALL( wntd )			\
+						\
+WALL( wndn )			\
+WALL( wndw )			\
+WALL( wndt )			\
+WALL( wndd )			\
+						\
+						\
+WALL( wwnn )			\
+WALL( wwnw )			\
+WALL( wwnt )			\
+WALL( wwnd )			\
+						\
+WALL( wwwn )			\
+WALL( wwww )			\
+WALL( wwwt )			\
+WALL( wwwd )			\
+						\
+WALL( wwtn )			\
+WALL( wwtw )			\
+WALL( wwtt )			\
+WALL( wwtd )			\
+						\
+WALL( wwdn )			\
+WALL( wwdw )			\
+WALL( wwdt )			\
+WALL( wwdd )			\
+						\
+						\
+WALL( wtnn )			\
+WALL( wtnw )			\
+WALL( wtnt )			\
+WALL( wtnd )			\
+						\
+WALL( wtwn )			\
+WALL( wtww )			\
+WALL( wtwt )			\
+WALL( wtwd )			\
+						\
+WALL( wttn )			\
+WALL( wttw )			\
+WALL( wttt )			\
+WALL( wttd )			\
+						\
+WALL( wtdn )			\
+WALL( wtdw )			\
+WALL( wtdt )			\
+WALL( wtdd )			\
+						\
+						\
+WALL( wdnn )			\
+WALL( wdnw )			\
+WALL( wdnt )			\
+WALL( wdnd )			\
+						\
+WALL( wdwn )			\
+WALL( wdww )			\
+WALL( wdwt )			\
+WALL( wdwd )			\
+						\
+WALL( wdtn )			\
+WALL( wdtw )			\
+WALL( wdtt )			\
+WALL( wdtd )			\
+						\
+WALL( wddn )			\
+WALL( wddw )			\
+WALL( wddt )			\
+WALL( wddd )			\
+						\
+						\
+						\
+						\
+WALL( tnnn )			\
+WALL( tnnw )			\
+WALL( tnnt )			\
+WALL( tnnd )			\
+						\
+WALL( tnwn )			\
+WALL( tnww )			\
+WALL( tnwt )			\
+WALL( tnwd )			\
+						\
+WALL( tntn )			\
+WALL( tntw )			\
+WALL( tntt )			\
+WALL( tntd )			\
+						\
+WALL( tndn )			\
+WALL( tndw )			\
+WALL( tndt )			\
+WALL( tndd )			\
+						\
+						\
+WALL( twnn )			\
+WALL( twnw )			\
+WALL( twnt )			\
+WALL( twnd )			\
+						\
+WALL( twwn )			\
+WALL( twww )			\
+WALL( twwt )			\
+WALL( twwd )			\
+						\
+WALL( twtn )			\
+WALL( twtw )			\
+WALL( twtt )			\
+WALL( twtd )			\
+						\
+WALL( twdn )			\
+WALL( twdw )			\
+WALL( twdt )			\
+WALL( twdd )			\
+						\
+						\
+WALL( ttnn )			\
+WALL( ttnw )			\
+WALL( ttnt )			\
+WALL( ttnd )			\
+						\
+WALL( ttwn )			\
+WALL( ttww )			\
+WALL( ttwt )			\
+WALL( ttwd )			\
+						\
+WALL( tttn )			\
+WALL( tttw )			\
+WALL( tttt )			\
+WALL( tttd )			\
+						\
+WALL( ttdn )			\
+WALL( ttdw )			\
+WALL( ttdt )			\
+WALL( ttdd )			\
+						\
+						\
+WALL( tdnn )			\
+WALL( tdnw )			\
+WALL( tdnt )			\
+WALL( tdnd )			\
+						\
+WALL( tdwn )			\
+WALL( tdww )			\
+WALL( tdwt )			\
+WALL( tdwd )			\
+						\
+WALL( tdtn )			\
+WALL( tdtw )			\
+WALL( tdtt )			\
+WALL( tdtd )			\
+						\
+WALL( tddn )			\
+WALL( tddw )			\
+WALL( tddt )			\
+WALL( tddd )			\
+						\
+						\
+						\
+						\
+WALL( dnnn )			\
+WALL( dnnw )			\
+WALL( dnnt )			\
+WALL( dnnd )			\
+						\
+WALL( dnwn )			\
+WALL( dnww )			\
+WALL( dnwt )			\
+WALL( dnwd )			\
+						\
+WALL( dntn )			\
+WALL( dntw )			\
+WALL( dntt )			\
+WALL( dntd )			\
+						\
+WALL( dndn )			\
+WALL( dndw )			\
+WALL( dndt )			\
+WALL( dndd )			\
+						\
+						\
+WALL( dwnn )			\
+WALL( dwnw )			\
+WALL( dwnt )			\
+WALL( dwnd )			\
+						\
+WALL( dwwn )			\
+WALL( dwww )			\
+WALL( dwwt )			\
+WALL( dwwd )			\
+						\
+WALL( dwtn )			\
+WALL( dwtw )			\
+WALL( dwtt )			\
+WALL( dwtd )			\
+						\
+WALL( dwdn )			\
+WALL( dwdw )			\
+WALL( dwdt )			\
+WALL( dwdd )			\
+						\
+						\
+WALL( dtnn )			\
+WALL( dtnw )			\
+WALL( dtnt )			\
+WALL( dtnd )			\
+						\
+WALL( dtwn )			\
+WALL( dtww )			\
+WALL( dtwt )			\
+WALL( dtwd )			\
+						\
+WALL( dttn )			\
+WALL( dttw )			\
+WALL( dttt )			\
+WALL( dttd )			\
+						\
+WALL( dtdn )			\
+WALL( dtdw )			\
+WALL( dtdt )			\
+WALL( dtdd )			\
+						\
+						\
+WALL( ddnn )			\
+WALL( ddnw )			\
+WALL( ddnt )			\
+WALL( ddnd )			\
+						\
+WALL( ddwn )			\
+WALL( ddww )			\
+WALL( ddwt )			\
+WALL( ddwd )			\
+						\
+WALL( ddtn )			\
+WALL( ddtw )			\
+WALL( ddtt )			\
+WALL( ddtd )			\
+						\
+WALL( dddn )			\
+WALL( dddw )			\
+WALL( dddt )			\
+WALL( dddd )
 
 
-#define DIRECTION( name ) name = name_to_enum( #name ),
+#define WALL( name ) name = name_to_enum( #name ),
 
 		enum Wall {
-			DIRECTIONS
+			WALLS
 		};
 
 	}
