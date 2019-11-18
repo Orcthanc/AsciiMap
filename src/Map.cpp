@@ -3,7 +3,7 @@
 #include "Map.hpp"
 
 using namespace Pathfinder;
-
+/*
 MapLayer::MapLayer( const std::string& filename ){
 	std::fstream file( filename, std::ios::binary );
 
@@ -12,6 +12,31 @@ MapLayer::MapLayer( const std::string& filename ){
 	cells = new MapCell[x_size * y_size];
 
 	//TODO
+}
+*/
+
+
+std::istream& Pathfinder::operator>>( std::istream& is, MapLayer& m ){
+	is >> m.x_size >> m.y_size;
+
+	m.cells = new MapCell[m.x_size * m.y_size];
+
+	for( size_t i = 0; i < m.x_size * m.y_size; ++i ){
+		is >> m.cells[i];
+	}
+
+	return is;
+}
+
+std::ostream& Pathfinder::operator<<( std::ostream& os, const MapLayer& m ){
+	os << m.x_size << m.y_size;
+
+	for( size_t i = 0; i < m.x_size * m.y_size; ++i ){
+		os << m.cells[i];
+	}
+
+	return os;
+
 }
 
 MapLayer::MapLayer( const std::vector<MapCell>& cells, uint32_t x_size, uint32_t y_size ): x_size( x_size ), y_size( y_size ){
@@ -35,6 +60,14 @@ MapLayer& MapLayer::operator=( MapLayer&& m ){
 	y_size = m.y_size;
 	m.cells = nullptr;
 	return *this;
+}
+
+std::istream& Pathfinder::operator>>( std::istream& i, MapCell& m ){
+	return i >> m.area_code >> m.walls.north >> m.walls.west >> m.walls.current;
+}
+
+std::ostream& Pathfinder::operator<<( std::ostream& o, const MapCell& m ){
+	return o << m.area_code << m.walls.north << m.walls.west << m.walls.current;
 }
 
 MapLayer::~MapLayer(){

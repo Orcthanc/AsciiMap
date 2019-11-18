@@ -29,13 +29,16 @@ namespace Pathfinder {
 	};
 
 	struct MapCell {
+		friend std::istream& operator>>( std::istream&, MapCell& );
+		friend std::ostream& operator<<( std::ostream&, const MapCell& );
 		//TODO
 		uint16_t area_code;
 		Walls walls;
 	};
+
 	struct MapLayer {
 		public:
-			MapLayer( const std::string& filename );
+			MapLayer() = default;
 
 			[[deprecated("For testing purposes, do not use")]]
 			MapLayer( const std::vector<MapCell>& cells, uint32_t x_size, uint32_t y_size );
@@ -45,7 +48,8 @@ namespace Pathfinder {
 			MapLayer( MapLayer&& );
 
 
-
+			friend std::istream& operator>>( std::istream&, MapLayer& );
+			friend std::ostream& operator<<( std::ostream&, const MapLayer& );
 
 			MapLayer& operator=( const MapLayer& ) = delete;
 			MapLayer& operator=( MapLayer&& );
@@ -68,4 +72,12 @@ namespace Pathfinder {
 		public:
 			Map( const std::string& filename );
 	};
+
+
+
+	std::istream& operator>>( std::istream&, MapCell& );
+	std::ostream& operator<<( std::ostream&, const MapCell& );
+
+	std::istream& operator>>( std::istream&, MapLayer& );
+	std::ostream& operator<<( std::ostream&, const MapLayer& );
 }

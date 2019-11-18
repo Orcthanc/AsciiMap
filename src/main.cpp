@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Map.hpp"
 #include "ConsoleRenderer.hpp"
 
@@ -79,6 +81,8 @@ int main( int argc, char** argv ){
 				}
 			}
 		}, 3, 3 };
+
+	std::cout << test << std::endl;
 
 	ConsoleRenderer r( std::move( test ));
 

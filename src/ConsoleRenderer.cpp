@@ -1,6 +1,8 @@
 #include <ncurses.h>
+#include <string.h>
 
 #include <iostream>
+#include <fstream>
 
 #include "ConsoleRenderer.hpp"
 
@@ -28,6 +30,7 @@ void ConsoleRenderer::operator()(){
 	nonl();
 	intrflush( stdscr, false );
 	keypad( stdscr, true );
+	set_escdelay( 20 );
 	curs_set( 0 );
 
 	drawMapLayer();
@@ -72,6 +75,10 @@ void ConsoleRenderer::handleUserInput(){
 			if( --scale == 0 )
 				scale = 1;
 			else
+				drawMapLayer();
+			break;
+		case ':':
+			if( handleColon() )
 				drawMapLayer();
 			break;
 		default:
@@ -150,3 +157,70 @@ void ConsoleRenderer::drawMapLayer(){
 
 #undef SCREEN_X
 #undef SCREEN_Y
+
+bool ConsoleRenderer::handleColon(){
+	int curr;
+	memset( input, 0, MAX_INPUT_SIZE );
+
+	mvprintw( y_size - 1, 0, "%*.s", x_size - 1, "" );
+	curs_set( 1 );
+
+	for( int i = 0; ; ++i ){
+		mvprintw( y_size - 1, 0, ":%s ", input );
+		wmove( stdscr, y_size - 1, i + 1 );
+		refresh();
+		if(( curr = getch()) == '\r' )
+			break;
+		fprintf( stderr, "%*.s", 10, "" );
+		if( curr == KEY_BACKSPACE ){
+			if( i == 0 ){
+				curs_set( 0 );
+				return true;
+			}
+			input[--i] = 0;
+			--i;
+		} else if( curr == 27 ){ //Escape
+			curs_set( 0 );
+			return true;
+		} else if( curr < 256 ){
+			input[i] = curr;
+		} else {
+			std::cerr << "Character exceeding max char detected (" << curr << ")" << std::endl;
+		}
+	}
+
+	curs_set( 0 );
+	char* command = strtok( input, " " );
+
+	if( command == nullptr )
+		return false;
+	else if( !strcmp( command, "write" ) || !strcmp( command, "w" )){
+		char* arg = strtok( nullptr, " " );
+		if( arg == nullptr ){
+			mvprintw( y_size - 1, 0, "Missing parameter file for function write" );
+			refresh();
+			return false;
+		}
+		std::ofstream os( arg, std::ios::binary );
+		os << map_layer;
+		return false;
+	}
+	else if( !strcmp( command, "edit" ) || !strcmp( command, "e" )){
+		char* arg = strtok( nullptr, " " );
+		if( arg == nullptr ){
+			mvprintw( y_size - 1, 0, "Missing parameter file for function edit" );
+			refresh();
+			return false;
+		}
+		filename = arg;
+		std::ifstream is( arg, std::ios::binary );
+		is >> map_layer;
+		return true;
+	}else if( !strcmp( command, "quit" ) || !strcmp( command, "q" )){
+		running = false;
+		return false;
+	}else {
+		mvprintw( y_size - 1, 0, "Unrecognized command %s", command );
+		return false;
+	}
+}
