@@ -3,8 +3,12 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <fstream>
 
 namespace Pathfinder {
+
+	struct MapCell;
+	struct MapLayer;
 
 	enum class WallType: uint16_t {
 		none = 0,
@@ -28,9 +32,43 @@ namespace Pathfinder {
 		std::underlying_type_t<FloorType> current;
 	};
 
+	struct BinSIStream {
+		BinSIStream( std::istream& is ): is( is ){}
+
+		BinSIStream& operator>>( MapCell& );
+		BinSIStream& operator>>( MapLayer& );
+
+		template<typename T>
+		std::enable_if_t<std::is_integral_v<T>, BinSIStream&> operator>>( T& t ){
+			//TODO little/big endian
+			is.read(( char* )&t, sizeof( T ));
+			return *this;
+		}
+
+		std::istream& is;
+	};
+
+	struct BinSOStream {
+		BinSOStream( std::ostream& os ): os( os ){}
+
+		BinSOStream& operator<<( const MapCell& );
+		BinSOStream& operator<<( const MapLayer& );
+
+		template<typename T>
+		std::enable_if_t<std::is_integral_v<T>, BinSOStream&> operator<<( const T& t ){
+			os.write(( char* )&t, sizeof( T ));
+			return *this;
+		}
+
+		std::ostream& os;
+	};
+
 	struct MapCell {
 		friend std::istream& operator>>( std::istream&, MapCell& );
 		friend std::ostream& operator<<( std::ostream&, const MapCell& );
+
+		friend BinSIStream& BinSIStream::operator>>( MapCell& );
+		friend BinSOStream& BinSOStream::operator<<( const MapCell& );
 		//TODO
 		uint16_t area_code;
 		Walls walls;
@@ -50,6 +88,9 @@ namespace Pathfinder {
 
 			friend std::istream& operator>>( std::istream&, MapLayer& );
 			friend std::ostream& operator<<( std::ostream&, const MapLayer& );
+
+			friend BinSIStream& BinSIStream::operator>>( MapLayer& );
+			friend BinSOStream& BinSOStream::operator<<( const MapLayer& );
 
 			MapLayer& operator=( const MapLayer& ) = delete;
 			MapLayer& operator=( MapLayer&& );
@@ -73,9 +114,7 @@ namespace Pathfinder {
 			Map( const std::string& filename );
 	};
 
-
-
-	std::istream& operator>>( std::istream&, MapCell& );
+		std::istream& operator>>( std::istream&, MapCell& );
 	std::ostream& operator<<( std::ostream&, const MapCell& );
 
 	std::istream& operator>>( std::istream&, MapLayer& );

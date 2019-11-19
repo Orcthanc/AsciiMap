@@ -6,6 +6,7 @@
 using namespace Pathfinder;
 
 int main( int argc, char** argv ){
+	/*
 	MapLayer test{
 		{
 			{
@@ -81,10 +82,9 @@ int main( int argc, char** argv ){
 				}
 			}
 		}, 3, 3 };
+*/
 
-	std::cout << test << std::endl;
-
-	ConsoleRenderer r( std::move( test ));
+	ConsoleRenderer r{ MapLayer{} };
 
 	r();
 }

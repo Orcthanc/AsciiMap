@@ -13,18 +13,21 @@ ConsoleRenderer::ConsoleRenderer( MapLayer&& ml ):
 		x_offset( 0 ),
 		y_offset( 0 ),
 		scale( 4 ),
-		running( true ){
+		running( true ),
+		filename(){
 
 	getmaxyx( stdscr, y_size, x_size );
 	setlocale( LC_ALL, "" );
 }
 
 ConsoleRenderer::~ConsoleRenderer(){
+	standend();
 	endwin();
 }
 
 void ConsoleRenderer::operator()(){
 	initscr();
+	start_color();
 	cbreak();
 	noecho();
 	nonl();
@@ -32,6 +35,20 @@ void ConsoleRenderer::operator()(){
 	keypad( stdscr, true );
 	set_escdelay( 20 );
 	curs_set( 0 );
+	use_default_colors();
+
+#define COL( i ) ( i * 1000 / 0xff )
+
+	init_color( COLOR_LIGHT_GREEN, COL( 0xCA ), COL( 0xE6 ), COL( 0x82 ));
+	init_color( COLOR_DARK_GREEN, COL( 0xFD ), COL( 0xE7 ), COL( 0x6E ));
+	init_color( COLOR_LIGHT_GREY, COL( 0x32 ), COL( 0x32 ), COL( 0x2F ));
+	init_color( COLOR_DARK_GREY, COL( 0x24 ), COL( 0x24 ), COL( 0x24 ));
+
+	init_pair( PAIR_DGREY_LGREEN, COLOR_DARK_GREY, COLOR_LIGHT_GREEN );
+	init_pair( PAIR_DGREY_DGREEN, COLOR_DARK_GREY, COLOR_DARK_GREEN );
+	init_pair( PAIR_LGREEN_LGREY, COLOR_LIGHT_GREEN, COLOR_LIGHT_GREY );
+	init_pair( PAIR_DGREEN_LGREY, COLOR_DARK_GREEN, COLOR_LIGHT_GREY );
+	init_pair( PAIR_LGRAY_DGRAY, COLOR_LIGHT_GREY, COLOR_DARK_GREY );
 
 	drawMapLayer();
 
@@ -85,6 +102,41 @@ void ConsoleRenderer::handleUserInput(){
 			mvprintw( y_size - 1, x_size - 5, "% 5i", c );
 			break;
 	}
+	drawFooter();
+}
+
+void ConsoleRenderer::drawFooter(){
+	//mvprintw( y_size - 1, 0, "x_offset: %i, y_offset: %i, scale: %i", x_offset, y_offset, scale );
+	int color;
+
+	switch( mode ){
+		case Mode::View:
+			attron( color = COLOR_PAIR( PAIR_DGREY_LGREEN ));
+			break;
+		case Mode::Edit:
+			attron( color = COLOR_PAIR( PAIR_DGREY_DGREEN ));
+			break;
+	}
+	wmove( stdscr, y_size - 2, 0 );
+
+	attron( A_BOLD );
+	printw( " %s ", ModeToString( mode ));
+
+	attroff( A_BOLD );
+	attroff( color );
+
+	switch( mode ){
+		case Mode::View:
+			attron( color = COLOR_PAIR( PAIR_LGREEN_LGREY ));
+			break;
+		case Mode::Edit:
+			attron( color = COLOR_PAIR( PAIR_DGREEN_LGREY ));
+			break;
+	}
+
+	printw( " x_offset: %i, y_offset: %i, scale: %i", x_offset, y_offset, scale );
+
+	attroff( color );
 }
 
 #define Y_SCALE_FAC 0.5f
@@ -93,8 +145,6 @@ void ConsoleRenderer::handleUserInput(){
 
 void ConsoleRenderer::drawMapLayer(){
 	clear();
-
-	mvprintw( y_size - 1, 0, "x_offset: %i, y_offset: %i, scale: %i", x_offset, y_offset, scale );
 
 	for( uint32_t y = 0; y < map_layer.y_size; ++y ){
 		for( uint32_t x = 0; x < map_layer.x_size; ++x ){
@@ -171,7 +221,6 @@ bool ConsoleRenderer::handleColon(){
 		refresh();
 		if(( curr = getch()) == '\r' )
 			break;
-		fprintf( stderr, "%*.s", 10, "" );
 		if( curr == KEY_BACKSPACE ){
 			if( i == 0 ){
 				curs_set( 0 );
@@ -195,32 +244,63 @@ bool ConsoleRenderer::handleColon(){
 	if( command == nullptr )
 		return false;
 	else if( !strcmp( command, "write" ) || !strcmp( command, "w" )){
-		char* arg = strtok( nullptr, " " );
+		const char* arg = strtok( nullptr, " " );
 		if( arg == nullptr ){
-			mvprintw( y_size - 1, 0, "Missing parameter file for function write" );
-			refresh();
-			return false;
+			if( filename == "" ){
+				mvprintw( y_size - 1, 0, "Missing parameter file for function write" );
+				refresh();
+				return false;
+			}
+			arg = filename.c_str();
 		}
 		std::ofstream os( arg, std::ios::binary );
 		os << map_layer;
 		return false;
-	}
-	else if( !strcmp( command, "edit" ) || !strcmp( command, "e" )){
-		char* arg = strtok( nullptr, " " );
-		if( arg == nullptr ){
-			mvprintw( y_size - 1, 0, "Missing parameter file for function edit" );
-			refresh();
-			return false;
+	} else if( !strcmp( command, "view" ) || !strcmp( command, "vie" )){
+		const char* arg = strtok( nullptr, " " );
+		if( arg != nullptr ){
+			filename = arg;
+			std::ifstream is( arg, std::ios::binary );
+			is >> map_layer;
 		}
-		filename = arg;
-		std::ifstream is( arg, std::ios::binary );
-		is >> map_layer;
+		mode = Mode::View;
 		return true;
-	}else if( !strcmp( command, "quit" ) || !strcmp( command, "q" )){
+	} else if( !strcmp( command, "quit" ) || !strcmp( command, "q" )){
 		running = false;
 		return false;
-	}else {
+	} else if( !strcmp( command, "edit" ) || !strcmp( command, "e" )){
+		const char* arg = strtok( nullptr, " " );
+		if( arg != nullptr ){
+			filename = arg;
+			std::ifstream is( arg, std::ios::binary );
+			is >> map_layer;
+		}
+		mode = Mode::Edit;
+		return true;
+	} else {
 		mvprintw( y_size - 1, 0, "Unrecognized command %s", command );
 		return false;
 	}
+}
+
+const char* Pathfinder::ModeToString( Mode m ){
+	switch( m ){
+		case Mode::View:
+			return "VIEW";
+		case Mode::Edit:
+			return "EDIT";
+	}
+
+	throw std::runtime_error( "Invalid mode: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));
+}
+
+short Pathfinder::ModeToColor( Mode m ){
+	switch( m ){
+		case Mode::View:
+			return COLOR_LIGHT_GREEN;
+		case Mode::Edit:
+			return COLOR_DARK_GREEN;
+	}
+
+	throw std::runtime_error( "Invalid mode: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));
 }
