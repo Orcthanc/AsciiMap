@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "Command.hpp"
 #include "Map.hpp"
 #include "ConsoleRenderer.hpp"
 

@@ -4,20 +4,7 @@
 
 using namespace Pathfinder;
 
-//TODO binary in/out
 std::istream& Pathfinder::operator>>( std::istream& is, MapLayer& m ){
-	/*
-	is >> m.x_size >> m.y_size;
-
-	m.cells = new MapCell[m.x_size * m.y_size];
-
-	for( size_t i = 0; i < m.x_size * m.y_size; ++i ){
-		is >> m.cells[i];
-	}
-
-	return is;
-	*/
-
 	BinSIStream( is ) >> m;
 	return is;
 }
@@ -45,13 +32,6 @@ BinSOStream& BinSOStream::operator<<( const MapLayer& m ){
 }
 
 std::ostream& Pathfinder::operator<<( std::ostream& os, const MapLayer& m ){
-	/*
-	os << m.x_size << m.y_size;
-
-	for( size_t i = 0; i < m.x_size * m.y_size; ++i ){
-		os << m.cells[i];
-	}
-*/
 	BinSOStream( os ) << m;
 	return os;
 
@@ -81,9 +61,6 @@ MapLayer& MapLayer::operator=( MapLayer&& m ){
 }
 
 std::istream& Pathfinder::operator>>( std::istream& i, MapCell& m ){
-	/*
-	return i >> m.area_code >> m.walls.north >> m.walls.west >> m.walls.current;
-	*/
 	BinSIStream( i ) >> m;
 	return i;
 }
@@ -93,9 +70,6 @@ BinSIStream& BinSIStream::operator>>( MapCell& m ){
 }
 
 std::ostream& Pathfinder::operator<<( std::ostream& o, const MapCell& m ){
-	/*
-	return o << m.area_code << m.walls.north << m.walls.west << m.walls.current;
-	*/
 	BinSOStream( o ) << m;
 	return o;
 }
@@ -122,4 +96,19 @@ MapCell& MapLayer::operator[]( const std::array<uint32_t, 2>& xy ) noexcept {
 
 const MapCell& MapLayer::operator[]( const std::array<uint32_t, 2>& xy ) const noexcept {
 	return at( xy[0], xy[1] );
+}
+
+void MapLayer::resize( uint32_t x, uint32_t y ){
+	MapCell* temp = new MapCell[x * y];
+
+	for( uint32_t iy = 0; iy < std::min(( uint32_t )y, y_size ); ++iy ){
+		for( uint32_t ix = 0; ix < std::min(( uint32_t )x, x_size ); ++ix ){
+			temp[x * iy + ix] = (*this)[{ ix, iy }];
+		}
+	}
+
+	std::swap( temp, cells );
+	x_size = x;
+	y_size = y;
+	delete[] temp;
 }

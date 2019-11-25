@@ -5,6 +5,7 @@
 
 namespace Pathfinder {
 	enum class Mode {
+		None,
 		View,
 		Edit,
 	};
@@ -16,12 +17,17 @@ namespace Pathfinder {
 #define COLOR_DARK_GREEN ( COLORS - 2 )
 #define COLOR_LIGHT_GREY ( COLORS - 3 )
 #define COLOR_DARK_GREY ( COLORS - 4 )
+#define COLOR_DARK_BLACK ( COLORS - 5 )
 
 #define PAIR_DGREY_LGREEN 1
 #define PAIR_DGREY_DGREEN 2
 #define PAIR_LGREEN_LGREY 3
 #define PAIR_DGREEN_LGREY 4
 #define PAIR_LGRAY_DGRAY 5
+#define PAIR_LGREEN_DGREY 6
+#define PAIR_DGREEN_DGREY 7
+#define PAIR_BLACK_LGREEN 8
+#define PAIR_BLACK_DGREEN 9
 
 	class ConsoleRenderer {
 		#define MAX_INPUT_SIZE 256
