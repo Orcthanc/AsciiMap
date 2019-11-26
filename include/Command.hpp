@@ -1,60 +1,71 @@
 #pragma once
 
 #include <map>
+#include "ConsoleRenderer.hpp"
 
 namespace Pathfinder {
 	struct Commands;
-		
-	using void_function_t = void (*)( void );
+
 	using function_id_t = size_t;
 
+	inline std::string mangle( Mode m, std::string name, size_t argc ){
+		return std::to_string( static_cast<std::underlying_type_t<Mode>>( m )) + name + std::to_string( argc );
+	}
+
 	struct insert_command_t {
-		insert_command_t& alias( std::string s );
+		insert_command_t& alias( Mode m, std::string s, size_t argc );
 		insert_command_t& help( std::string s );
 
 		Commands* cmds;
 		function_id_t cmd;
 	};
 
+	struct cmd_ret_t {
+		bool success, redraw;
+		const char* message;	//Displayed in lower left
+	};
+
+	using function_t = cmd_ret_t (*)( void );
+
+
 	struct Commands {
 
 		public:
-			template<typename T>
-			insert_command_t insert( std::string s, T&& val ){
+			template<typename T, typename Name>
+			auto insert( Mode m, Name&& s, size_t argc, T&& val )
+					-> std::enable_if_t<std::is_convertible_v<Name, std::string>, insert_command_t>{
 				static function_id_t id{ 0 };
 				commands.insert({ id, std::forward( val )});
-				cmd_to_id.insert({ s, id });
+				cmd_to_id.insert({ mangle( m, std::forward( s ), argc ), id });
 				return { this, id++ };
 			}
 
 			template<typename T, typename ...Args>
-			std::enable_if_t<std::is_convertible_v<T, std::string>, bool> find_and_call( const T&& name, Args... args ){
+			auto find_and_call( const T&& name, Args... args )
+					-> std::enable_if_t<std::is_convertible_v<T, std::string>, cmd_ret_t>{
 				auto t = cmd_to_id.find( std::forward( name ));
 				if( t == cmd_to_id.end())
-					return false;
+					return { false, false, "Could not find command :\"" + name + "\"" };
 
-				( void (*)( Args... ))( commands.find( t->second )->second())( std::forward<Args>( args )... );
-
-				return true;
+				return ( void (*)( Args... ))( commands.find( t->second )->second())( std::forward<Args>( args )... );
 			}
 
 			//TODO google
 			template<typename T, typename ...Args>
-			bool find_and_call( function_id_t id, Args... args ){
-				( void (*)( Args... ))( commands.find( id )->second())( std::forward<Args>( args )... );
-				return true;
+			cmd_ret_t find_and_call( function_id_t id, Args... args ){
+				return ( void (*)( Args... ))( commands.find( id )->second())( std::forward<Args>( args )... );
 			}
 
 			inline insert_command_t modify( const std::string& s ){
 				return { this, cmd_to_id.find( s )->second };
 			}
 
-			void alias( function_id_t id, std::string a );
+			void alias( function_id_t id, Mode m, std::string a, size_t argc );
 			void help( function_id_t id, std::string s );
 
 		private:
 			std::map<std::string, function_id_t> cmd_to_id;
-			std::map<function_id_t, void_function_t> commands;
+			std::map<function_id_t, function_t> commands;
 			std::map<function_id_t, std::string> help_text;
 	};
 }

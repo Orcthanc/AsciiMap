@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Command.hpp"
+#include "Global.hpp"
 #include "Map.hpp"
 #include "ConsoleRenderer.hpp"
 
@@ -84,6 +84,7 @@ int main( int argc, char** argv ){
 			}
 		}, 3, 3 };
 */
+	GlobalData::init();
 
 	ConsoleRenderer r{ MapLayer{} };
 

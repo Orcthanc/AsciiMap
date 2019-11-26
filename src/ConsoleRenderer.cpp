@@ -6,6 +6,8 @@
 
 #include "Common.hpp"
 #include "ConsoleRenderer.hpp"
+#include "Commands.hpp"
+#include "Global.hpp"
 
 using namespace Pathfinder;
 
@@ -14,11 +16,13 @@ ConsoleRenderer::ConsoleRenderer( MapLayer&& ml ):
 		x_offset( 0 ),
 		y_offset( 0 ),
 		scale( 4 ),
-		running( true ),
-		filename(){
+		running( true )
+		{
 
 	getmaxyx( stdscr, y_size, x_size );
 	setlocale( LC_ALL, "" );
+
+	CommandList::registerAll();
 }
 
 ConsoleRenderer::~ConsoleRenderer(){
@@ -138,6 +142,7 @@ void ConsoleRenderer::drawFooter(){
 			attron( color = COLOR_PAIR( PAIR_BLACK_LGREEN ));
 			break;
 		case Mode::Edit:
+		case Mode::Exec:
 			attron( color = COLOR_PAIR( PAIR_BLACK_DGREEN ));
 			break;
 	}
@@ -156,6 +161,7 @@ void ConsoleRenderer::drawFooter(){
 			attron( color = COLOR_PAIR( PAIR_LGREEN_LGREY ));
 			break;
 		case Mode::Edit:
+		case Mode::Exec:
 			attron( color = COLOR_PAIR( PAIR_DGREEN_LGREY ));
 			break;
 	}
@@ -177,12 +183,13 @@ void ConsoleRenderer::drawFooter(){
 			attron( color = COLOR_PAIR( PAIR_LGREEN_DGREY ));
 			break;
 		case Mode::Edit:
+		case Mode::Exec:
 			attron( color = COLOR_PAIR( PAIR_DGREEN_DGREY ));
 			break;
 
 	}
-	printw( " %s", filename == "" ? "[New file]" : filename.c_str());
-	x += filename.empty() ? 10 : snprintf( nullptr, 0, " %s", filename.c_str() );
+	printw( " %s", GlobalData::get()->filename == "" ? "[New file]" : GlobalData::get()->filename.c_str());
+	x += GlobalData::get()->filename.empty() ? 10 : snprintf( nullptr, 0, " %s", GlobalData::get()->filename.c_str() );
 
 	printw( "% *s", x_size - x + 2, "" );
 
@@ -294,21 +301,21 @@ bool ConsoleRenderer::handleColon(){
 	else if( !strcmp( command, "write" ) || !strcmp( command, "w" )){
 		const char* arg = strtok( nullptr, " " );
 		if( arg == nullptr ){
-			if( filename == "" ){
+			if( GlobalData::get()->filename == "" ){
 				mvprintw( y_size - 1, 0, "Missing parameter file for function write" );
 				refresh();
 				return false;
 			}
-			arg = filename.c_str();
+			arg = GlobalData::get()->filename.c_str();
 		}
 		std::ofstream os( arg, std::ios::binary );
 		os << map_layer;
-		mvprintw( y_size - 1, 0, "Map of size %ux%u written to \"%s\"", map_layer.x_size, map_layer.y_size, filename.c_str() );
+		mvprintw( y_size - 1, 0, "Map of size %ux%u written to \"%s\"", map_layer.x_size, map_layer.y_size, GlobalData::get()->filename.c_str() );
 		return false;
 	} else if( !strcmp( command, "view" ) || !strcmp( command, "vie" )){
 		const char* arg = strtok( nullptr, " " );
 		if( arg != nullptr ){
-			filename = arg;
+			GlobalData::get()->filename = arg;
 			std::ifstream is( arg, std::ios::binary );
 			is >> map_layer;
 		}
@@ -320,7 +327,7 @@ bool ConsoleRenderer::handleColon(){
 	} else if( !strcmp( command, "edit" ) || !strcmp( command, "e" )){
 		const char* arg = strtok( nullptr, " " );
 		if( arg != nullptr ){
-			filename = arg;
+			GlobalData::get()->filename = arg;
 			std::ifstream is( arg, std::ios::binary );
 			is >> map_layer;
 		}
@@ -329,7 +336,7 @@ bool ConsoleRenderer::handleColon(){
 	} else if( !strcmp( command, "enew" ) || !strcmp( command, "ene" )){
 		mode = Mode::Edit;
 		map_layer = MapLayer();
-		filename = "";
+		GlobalData::get()->filename = "";
 		return true;
 	} else if( !strcmp( command, "resize" ) || !strcmp( command, "res" )){
 		int x, y;
@@ -388,6 +395,8 @@ const char* Pathfinder::ModeToString( Mode m ){
 			return "VIEW";
 		case Mode::Edit:
 			return "EDIT";
+		case Mode::Exec:
+			return "Exec";
 	}
 
 	throw std::runtime_error( "Invalid mode: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));
@@ -401,6 +410,8 @@ short Pathfinder::ModeToColor( Mode m ){
 			return COLOR_LIGHT_GREEN;
 		case Mode::Edit:
 			return COLOR_DARK_GREEN;
+		case Mode::Exec:
+			return COLOR_MAGENTA;
 	}
 
 	throw std::runtime_error( "Invalid mode: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));

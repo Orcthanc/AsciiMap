@@ -5,9 +5,10 @@
 
 namespace Pathfinder {
 	enum class Mode {
-		None,
-		View,
-		Edit,
+		None,	//On startup when no file is open
+		View,	//Self explanatory
+		Edit,	//Self explanatory
+		Exec,	//Dummy mode (should not be entered) to signal a colon command
 	};
 
 	extern const char* ModeToString( Mode m );
@@ -51,7 +52,6 @@ namespace Pathfinder {
 			int scale;
 			bool running;
 			char input[MAX_INPUT_SIZE];
-			std::string filename;
 			Mode mode;
 	};
 }
