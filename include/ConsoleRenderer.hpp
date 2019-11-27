@@ -33,16 +33,27 @@ namespace Pathfinder {
 #define PAIR_BLACK_DGREEN 9
 
 	struct Window {
-		Window() = default;
+		Window(): n_window{ nullptr }, x_size{ 0 }, y_size{ 0 }{}
 		Window( int x, int y, int x_size, int y_size );
 
 		Window( const Window& ) = delete;
-		Window( Window&& ) = default;
+		Window( Window&& w ){
+			n_window = w.n_window;
+			x_size = w.x_size;
+			y_size = w.y_size;
+			w.n_window = nullptr;
+		}
 
 		~Window();
 
 		Window& operator=( const Window& ) = delete;
-		Window& operator=( Window&& ) = default;
+		Window& operator=( Window&& w ){
+			n_window = w.n_window;
+			x_size = w.x_size;
+			y_size = w.y_size;
+			w.n_window = nullptr;
+			return *this;
+		}
 		operator WINDOW*();
 
 		WINDOW* n_window;

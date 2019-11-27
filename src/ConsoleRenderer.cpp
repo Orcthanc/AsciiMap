@@ -15,11 +15,12 @@ Window::Window( int x, int y, int x_size, int y_size ){
 	n_window = newwin( y_size, x_size, y, x );
 	if( !n_window )
 		std::cerr << "Could not create window at: " << x << "; " << y << std::endl;
-	getmaxyx( n_window, y_size, x_size );
+	getmaxyx( n_window, this->y_size, this->x_size );
 }
 
 Window::~Window(){
-	delwin( n_window );
+	if( n_window )
+		delwin( n_window );
 }
 
 Window::operator WINDOW*(){
@@ -38,9 +39,19 @@ ConsoleRenderer::ConsoleRenderer( MapLayer&& ml ):
 	setlocale( LC_ALL, "" );
 	initscr();
 
+	start_color();
+	cbreak();
+	noecho();
+	nonl();
+	intrflush( stdscr, false );
+	keypad( stdscr, true );
+	set_escdelay( 20 );
+	curs_set( 0 );
+	use_default_colors();
+
 	getmaxyx( stdscr, y_size, x_size );
 
-	windows.map = { 0, 0, 0, y_size - 3 };
+	windows.map = { 0, 0, 0, y_size - 2 };
 	windows.infobar = { 0, y_size - 2, 0, 1 };
 	windows.bottom = { 0, y_size - 1, 0, 0 };
 
@@ -55,15 +66,8 @@ ConsoleRenderer::~ConsoleRenderer(){
 }
 
 void ConsoleRenderer::operator()(){
-	start_color();
-	cbreak();
-	noecho();
-	nonl();
-	intrflush( stdscr, false );
-	keypad( stdscr, true );
-	set_escdelay( 20 );
-	curs_set( 0 );
-	use_default_colors();
+
+	refresh();
 
 #define COL( i ) ( i * 1000 / 0xff )
 
@@ -86,7 +90,17 @@ void ConsoleRenderer::operator()(){
 	getmaxyx( stdscr, y_size, x_size );
 
 	drawFooter();
-	drawMapLayer();
+	//drawMapLayer();
+
+	/*
+	wborder( windows.map, '+', '+', '+', '+', '+', '+', '+', '+' );
+	wborder( windows.infobar, '-', '-', '-', '-', '-', '-', '-', '-' );
+	wborder( windows.bottom, '.', '.', '.', '.', '.', '.', '.', '.' );
+	*/
+
+	wrefresh( windows.map );
+	wrefresh( windows.infobar );
+	wrefresh( windows.bottom );
 
 	while( running ){
 		handleUserInput();
@@ -162,52 +176,52 @@ void ConsoleRenderer::drawFooter(){
 	switch( mode ){
 		case Mode::None:
 		case Mode::View:
-			attron( color = COLOR_PAIR( PAIR_BLACK_LGREEN ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_BLACK_LGREEN ));
 			break;
 		case Mode::Edit:
 		case Mode::Exec:
-			attron( color = COLOR_PAIR( PAIR_BLACK_DGREEN ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_BLACK_DGREEN ));
 			break;
 	}
 	wmove( windows.infobar, 0, 0 );
 
-	attron( A_BOLD );
+	wattron( windows.infobar, A_BOLD );
 	wprintw( windows.infobar, " %s ", ModeToString( mode ));
 	x += snprintf( nullptr, 0, " %s ", ModeToString( mode ));
 
-	attroff( A_BOLD );
-	attroff( color );
+	wattroff( windows.infobar, A_BOLD );
+	wattroff( windows.infobar, color );
 
 	switch( mode ){
 		case Mode::None:
 		case Mode::View:
-			attron( color = COLOR_PAIR( PAIR_LGREEN_LGREY ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_LGREEN_LGREY ));
 			break;
 		case Mode::Edit:
 		case Mode::Exec:
-			attron( color = COLOR_PAIR( PAIR_DGREEN_LGREY ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_DGREEN_LGREY ));
 			break;
 	}
 
 	wprintw( windows.infobar, " x_offset: %i, y_offset: %i, scale: %i ", x_offset, y_offset, scale );
 	x += snprintf( nullptr, 0, " x_offset: %i, y_offset: %i, scale: %i ", x_offset, y_offset, scale );
 
-	attroff( color );
-	attron( color = COLOR_PAIR( PAIR_LGRAY_DGRAY ));
+	wattroff( windows.infobar, color );
+	wattron( windows.infobar, color = COLOR_PAIR( PAIR_LGRAY_DGRAY ));
 
 	wprintw( windows.infobar, "" );
 	x += 1;
 
-	attroff( color );
+	wattroff( windows.infobar, color );
 
 	switch( mode ){
 		case Mode::None:
 		case Mode::View:
-			attron( color = COLOR_PAIR( PAIR_LGREEN_DGREY ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_LGREEN_DGREY ));
 			break;
 		case Mode::Edit:
 		case Mode::Exec:
-			attron( color = COLOR_PAIR( PAIR_DGREEN_DGREY ));
+			wattron( windows.infobar, color = COLOR_PAIR( PAIR_DGREEN_DGREY ));
 			break;
 
 	}
@@ -216,9 +230,9 @@ void ConsoleRenderer::drawFooter(){
 
 	wprintw( windows.infobar, "% *s", x_size - x + 2, "" );
 
-	attroff( color );
+	wattroff( windows.infobar, color );
 
-	wrefresh( windows.infobar );
+	wrefresh( windows.infobar.n_window );
 }
 
 #define Y_SCALE_FAC 0.5f
@@ -226,7 +240,7 @@ void ConsoleRenderer::drawFooter(){
 #define SCREEN_Y ( y * std::max( (int)( scale * Y_SCALE_FAC ), 1 ) + y_offset )
 
 void ConsoleRenderer::drawMapLayer(){
-	erase();
+	werase( windows.map );
 
 	for( uint32_t y = 0; y < map_layer.y_size; ++y ){
 		for( uint32_t x = 0; x < map_layer.x_size; ++x ){
@@ -266,6 +280,7 @@ void ConsoleRenderer::drawMapLayer(){
 				if( y > 0 && map_layer[{ x, y - 1 }].walls.west == static_cast<WallType_t>( WallType::door ))
 				draw += 0b0100;
 			}
+
 			if( SCREEN_X >= 0 && SCREEN_X < static_cast<unsigned>( windows.map.x_size ) && SCREEN_Y >= 0 && SCREEN_Y < static_cast<unsigned>( windows.map.y_size )){
 				wprintw( windows.map, "%s", dir_to_chars( static_cast<Wall::Wall>( draw )).c_str() );
 			}
@@ -283,7 +298,6 @@ void ConsoleRenderer::drawMapLayer(){
 			}
 		}
 	}
-	std::cerr << windows.map << std::endl;
 	wrefresh( windows.map );
 }
 
@@ -294,14 +308,14 @@ bool ConsoleRenderer::handleColon(){
 	int curr;
 	memset( input, 0, MAX_INPUT_SIZE );
 
-	mvwprintw( windows.bottom, 0, 0, "%*.s", windows.bottom.x_size - 1, "" );
+	werase( windows.bottom );
 	curs_set( 1 );
 
 	wrefresh( windows.bottom );
 
 	for( int i = 0; ; ++i ){
 		mvwprintw( windows.bottom, 0, 0, ":%s ", input );
-		wmove( windows.bottom, y_size - 1, i + 1 );
+		wmove( stdscr, y_size - 1, i + 1 );
 		wrefresh( windows.bottom );
 		if(( curr = getch()) == '\r' )
 			break;
