@@ -430,10 +430,10 @@ bool ConsoleRenderer::handleColon(){
 				" - right_arrow                See above",
 				" - :help                      Displays this help",
 	/			" - :w[rite] [filename]        Saves the map to filename, or the last opened file if none specified",
-				" - :vie[w] [filename]         Switches to view-mode and opens filename if given",
+	/			" - :vie[w] [filename]         Switches to view-mode and opens filename if given",
 	/			" - :e[dit] [filename]         Switches to edit-mode and opens filename if given",
-				" - :ene[w]                    Switches to edit-mode and creates a new map",
-				" - :res[ize] x [y]            Resizes the map-layer to the dimension x*y",
+	/			" - :ene[w]                    Switches to edit-mode and creates a new map",
+	/			" - :res[ize] x [y]            Resizes the map-layer to the dimension x*y",
 		};
 
 		for( size_t i = 0; i < lines.size(); ++i ){

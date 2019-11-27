@@ -1,6 +1,8 @@
 #pragma once
 
 #include <map>
+#include <iostream>
+
 #include "ConsoleRenderer.hpp"
 
 namespace Pathfinder {
@@ -35,9 +37,9 @@ namespace Pathfinder {
 			template<typename T, typename Name>
 			auto insert( Mode m, Name&& s, T&& val )
 					-> std::enable_if_t<std::is_convertible_v<Name, std::string>, insert_command_t>{
-				static function_id_t id{ 0 };
 				commands.insert({ id, std::forward<T>( val )});
 				cmd_to_id.insert({ mangle( m, std::forward<Name>( s )), id });
+				std::cerr << mangle( m, std::forward<Name>( s )) << " " << id << std::endl;
 				return { this, id++ };
 			}
 
@@ -63,9 +65,10 @@ namespace Pathfinder {
 			void alias( function_id_t id, Mode m, std::string a );
 			void help( function_id_t id, std::string s );
 
+			std::map<function_id_t, std::string> help_text;
 		private:
+			function_id_t id{ 0 };
 			std::map<std::string, function_id_t> cmd_to_id;
 			std::map<function_id_t, function_t> commands;
-			std::map<function_id_t, std::string> help_text;
 	};
 }
