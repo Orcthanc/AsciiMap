@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ncurses.h>
+
 #include "DrawUtils.hpp"
 #include "Map.hpp"
 
@@ -30,6 +32,30 @@ namespace Pathfinder {
 #define PAIR_BLACK_LGREEN 8
 #define PAIR_BLACK_DGREEN 9
 
+	struct Window {
+		Window() = default;
+		Window( int x, int y, int x_size, int y_size );
+
+		Window( const Window& ) = delete;
+		Window( Window&& ) = default;
+
+		~Window();
+
+		Window& operator=( const Window& ) = delete;
+		Window& operator=( Window&& ) = default;
+		operator WINDOW*();
+
+		WINDOW* n_window;
+		uint32_t x_size;
+		uint32_t y_size;
+	};
+
+	struct Windows {
+		Window map;
+		Window infobar;
+		Window bottom;
+	};
+
 	class ConsoleRenderer {
 		#define MAX_INPUT_SIZE 256
 
@@ -53,5 +79,6 @@ namespace Pathfinder {
 			bool running;
 			char input[MAX_INPUT_SIZE];
 			Mode mode;
+			Windows windows;
 	};
 }

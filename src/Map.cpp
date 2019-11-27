@@ -1,4 +1,5 @@
 #include <fstream>
+#include <string.h>
 
 #include "Map.hpp"
 
@@ -13,6 +14,7 @@ BinSIStream& BinSIStream::operator>>( MapLayer& m ){
 	*this >> m.x_size >> m.y_size;
 
 	m.cells = new MapCell[m.x_size * m.y_size];
+	memset( m.cells, 0, m.x_size * m.y_size * sizeof( MapCell ));
 
 	for( size_t i = 0; i < m.x_size * m.y_size; ++i ){
 		*this >> m.cells[i];
@@ -39,6 +41,8 @@ std::ostream& Pathfinder::operator<<( std::ostream& os, const MapLayer& m ){
 
 MapLayer::MapLayer( const std::vector<MapCell>& cells, uint32_t x_size, uint32_t y_size ): x_size( x_size ), y_size( y_size ){
 	this->cells = new MapCell[x_size * y_size];
+
+	memset( this->cells, 0, x_size * y_size * sizeof( MapCell ));
 
 	for( size_t i = 0; i < x_size * y_size; ++i ){
 		this->cells[i] = cells[i];
@@ -100,6 +104,7 @@ const MapCell& MapLayer::operator[]( const std::array<uint32_t, 2>& xy ) const n
 
 void MapLayer::resize( uint32_t x, uint32_t y ){
 	MapCell* temp = new MapCell[x * y];
+	memset( temp, 0, x * y * sizeof( MapCell ));
 
 	for( uint32_t iy = 0; iy < std::min(( uint32_t )y, y_size ); ++iy ){
 		for( uint32_t ix = 0; ix < std::min(( uint32_t )x, x_size ); ++ix ){

@@ -11,16 +11,40 @@
 
 using namespace Pathfinder;
 
+Window::Window( int x, int y, int x_size, int y_size ){
+	n_window = newwin( y_size, x_size, y, x );
+	if( !n_window )
+		std::cerr << "Could not create window at: " << x << "; " << y << std::endl;
+	getmaxyx( n_window, y_size, x_size );
+}
+
+Window::~Window(){
+	delwin( n_window );
+}
+
+Window::operator WINDOW*(){
+	return n_window;
+}
+
 ConsoleRenderer::ConsoleRenderer( MapLayer&& ml ):
 		map_layer( std::move( ml )),
 		x_offset( 0 ),
 		y_offset( 0 ),
 		scale( 4 ),
-		running( true )
+		running( true ),
+		mode( Mode::None )
 		{
 
-	getmaxyx( stdscr, y_size, x_size );
 	setlocale( LC_ALL, "" );
+	initscr();
+
+	getmaxyx( stdscr, y_size, x_size );
+
+	windows.map = { 0, 0, 0, y_size - 3 };
+	windows.infobar = { 0, y_size - 2, 0, 1 };
+	windows.bottom = { 0, y_size - 1, 0, 0 };
+
+	//TODO replace stdscr
 
 	CommandList::registerAll();
 }
@@ -31,7 +55,6 @@ ConsoleRenderer::~ConsoleRenderer(){
 }
 
 void ConsoleRenderer::operator()(){
-	initscr();
 	start_color();
 	cbreak();
 	noecho();
@@ -62,8 +85,8 @@ void ConsoleRenderer::operator()(){
 
 	getmaxyx( stdscr, y_size, x_size );
 
-	drawMapLayer();
 	drawFooter();
+	drawMapLayer();
 
 	while( running ){
 		handleUserInput();
@@ -72,7 +95,6 @@ void ConsoleRenderer::operator()(){
 
 void ConsoleRenderer::handleUserInput(){
 	int c;
-	getmaxyx( stdscr, y_size, x_size );
 	switch( c = getch() ){
 		case 27: //ESC
 			running = false;
@@ -123,16 +145,17 @@ void ConsoleRenderer::handleUserInput(){
 			if( handleColon() )
 				drawMapLayer();
 			break;
+		case KEY_RESIZE:
+			//TODO
+			break;
 		default:
-			mvprintw( y_size - 1, x_size - 5, "% 5i", c );
+			mvwprintw( windows.bottom, 0, windows.bottom.x_size - 5, "% 5i", c );
 			break;
 	}
 	drawFooter();
-	refresh();
 }
 
 void ConsoleRenderer::drawFooter(){
-	//mvprintw( y_size - 1, 0, "x_offset: %i, y_offset: %i, scale: %i", x_offset, y_offset, scale );
 	int color;
 	int x = 0;
 
@@ -146,10 +169,10 @@ void ConsoleRenderer::drawFooter(){
 			attron( color = COLOR_PAIR( PAIR_BLACK_DGREEN ));
 			break;
 	}
-	wmove( stdscr, y_size - 2, 0 );
+	wmove( windows.infobar, 0, 0 );
 
 	attron( A_BOLD );
-	printw( " %s ", ModeToString( mode ));
+	wprintw( windows.infobar, " %s ", ModeToString( mode ));
 	x += snprintf( nullptr, 0, " %s ", ModeToString( mode ));
 
 	attroff( A_BOLD );
@@ -166,13 +189,13 @@ void ConsoleRenderer::drawFooter(){
 			break;
 	}
 
-	printw( " x_offset: %i, y_offset: %i, scale: %i ", x_offset, y_offset, scale );
+	wprintw( windows.infobar, " x_offset: %i, y_offset: %i, scale: %i ", x_offset, y_offset, scale );
 	x += snprintf( nullptr, 0, " x_offset: %i, y_offset: %i, scale: %i ", x_offset, y_offset, scale );
 
 	attroff( color );
 	attron( color = COLOR_PAIR( PAIR_LGRAY_DGRAY ));
 
-	printw( "" );
+	wprintw( windows.infobar, "" );
 	x += 1;
 
 	attroff( color );
@@ -188,12 +211,14 @@ void ConsoleRenderer::drawFooter(){
 			break;
 
 	}
-	printw( " %s", GlobalData::get()->filename == "" ? "[New file]" : GlobalData::get()->filename.c_str());
+	wprintw( windows.infobar, " %s", GlobalData::get()->filename == "" ? "[New file]" : GlobalData::get()->filename.c_str());
 	x += GlobalData::get()->filename.empty() ? 10 : snprintf( nullptr, 0, " %s", GlobalData::get()->filename.c_str() );
 
-	printw( "% *s", x_size - x + 2, "" );
+	wprintw( windows.infobar, "% *s", x_size - x + 2, "" );
 
 	attroff( color );
+
+	wrefresh( windows.infobar );
 }
 
 #define Y_SCALE_FAC 0.5f
@@ -205,7 +230,7 @@ void ConsoleRenderer::drawMapLayer(){
 
 	for( uint32_t y = 0; y < map_layer.y_size; ++y ){
 		for( uint32_t x = 0; x < map_layer.x_size; ++x ){
-			wmove( stdscr, SCREEN_Y, SCREEN_X );
+			wmove( windows.map, SCREEN_Y, SCREEN_X );
 			std::underlying_type_t<Wall::Wall> draw = 0;
 
 			using WallType_t = std::underlying_type_t<WallType>;
@@ -241,23 +266,25 @@ void ConsoleRenderer::drawMapLayer(){
 				if( y > 0 && map_layer[{ x, y - 1 }].walls.west == static_cast<WallType_t>( WallType::door ))
 				draw += 0b0100;
 			}
-			if( SCREEN_X >= 0 && SCREEN_X < static_cast<unsigned>( x_size ) && SCREEN_Y >= 0 && SCREEN_Y < static_cast<unsigned>( y_size - 2 )){
-				printw( "%s", dir_to_chars( static_cast<Wall::Wall>( draw )).c_str() );
+			if( SCREEN_X >= 0 && SCREEN_X < static_cast<unsigned>( windows.map.x_size ) && SCREEN_Y >= 0 && SCREEN_Y < static_cast<unsigned>( windows.map.y_size )){
+				wprintw( windows.map, "%s", dir_to_chars( static_cast<Wall::Wall>( draw )).c_str() );
 			}
 
 			for( int x2 = 1; x2 < scale; ++x2 ){
-				if( SCREEN_X + x2 >= 0 && SCREEN_X + x2 < static_cast<unsigned>( x_size ) && SCREEN_Y >= 0 && SCREEN_Y < static_cast<unsigned>( y_size - 2 )){
-					mvprintw( SCREEN_Y, SCREEN_X + x2, "%s", dir_to_chars( static_cast<Wall::Wall>( line & 0b11000011 )).c_str() );
+				if( SCREEN_X + x2 >= 0 && SCREEN_X + x2 < static_cast<unsigned>( windows.map.x_size ) && SCREEN_Y >= 0 && SCREEN_Y < static_cast<unsigned>( windows.map.y_size )){
+					mvwprintw( windows.map, SCREEN_Y, SCREEN_X + x2, "%s", dir_to_chars( static_cast<Wall::Wall>( line & 0b11000011 )).c_str() );
 				}
 			}
 
 			for( int y2 = 1; y2 < scale * Y_SCALE_FAC; ++y2 ){
-				if( SCREEN_X >= 0 && SCREEN_X < static_cast<unsigned>( x_size ) && SCREEN_Y + y2 >= 0 && SCREEN_Y + y2 < static_cast<unsigned>( y_size - 2 )){
-					mvprintw( SCREEN_Y + y2, SCREEN_X, "%s", dir_to_chars( static_cast<Wall::Wall>( line & 0b00111100 )).c_str() );
+				if( SCREEN_X >= 0 && SCREEN_X < static_cast<unsigned>( windows.map.x_size ) && SCREEN_Y + y2 >= 0 && SCREEN_Y + y2 < static_cast<unsigned>( windows.map.y_size )){
+					mvwprintw( windows.map, SCREEN_Y + y2, SCREEN_X, "%s", dir_to_chars( static_cast<Wall::Wall>( line & 0b00111100 )).c_str() );
 				}
 			}
 		}
 	}
+	std::cerr << windows.map << std::endl;
+	wrefresh( windows.map );
 }
 
 #undef SCREEN_X
@@ -267,13 +294,15 @@ bool ConsoleRenderer::handleColon(){
 	int curr;
 	memset( input, 0, MAX_INPUT_SIZE );
 
-	mvprintw( y_size - 1, 0, "%*.s", x_size - 1, "" );
+	mvwprintw( windows.bottom, 0, 0, "%*.s", windows.bottom.x_size - 1, "" );
 	curs_set( 1 );
 
+	wrefresh( windows.bottom );
+
 	for( int i = 0; ; ++i ){
-		mvprintw( y_size - 1, 0, ":%s ", input );
-		wmove( stdscr, y_size - 1, i + 1 );
-		refresh();
+		mvwprintw( windows.bottom, 0, 0, ":%s ", input );
+		wmove( windows.bottom, y_size - 1, i + 1 );
+		wrefresh( windows.bottom );
 		if(( curr = getch()) == '\r' )
 			break;
 		if( curr == KEY_BACKSPACE ){
@@ -302,15 +331,14 @@ bool ConsoleRenderer::handleColon(){
 		const char* arg = strtok( nullptr, " " );
 		if( arg == nullptr ){
 			if( GlobalData::get()->filename == "" ){
-				mvprintw( y_size - 1, 0, "Missing parameter file for function write" );
-				refresh();
+				mvwprintw( windows.bottom, 0, 0, "Missing parameter file for function write" );
 				return false;
 			}
 			arg = GlobalData::get()->filename.c_str();
 		}
 		std::ofstream os( arg, std::ios::binary );
 		os << map_layer;
-		mvprintw( y_size - 1, 0, "Map of size %ux%u written to \"%s\"", map_layer.x_size, map_layer.y_size, GlobalData::get()->filename.c_str() );
+		mvwprintw( windows.bottom, 0, 0, "Map of size %ux%u written to \"%s\"", map_layer.x_size, map_layer.y_size, GlobalData::get()->filename.c_str() );
 		return false;
 	} else if( !strcmp( command, "view" ) || !strcmp( command, "vie" )){
 		const char* arg = strtok( nullptr, " " );
@@ -335,6 +363,7 @@ bool ConsoleRenderer::handleColon(){
 		return true;
 	} else if( !strcmp( command, "enew" ) || !strcmp( command, "ene" )){
 		mode = Mode::Edit;
+		//TODO doesn't delete old layer
 		map_layer = MapLayer();
 		GlobalData::get()->filename = "";
 		return true;
@@ -342,7 +371,7 @@ bool ConsoleRenderer::handleColon(){
 		int x, y;
 		const char* arg = strtok( nullptr, " " );
 		if( arg == nullptr ){
-			mvprintw( y_size - 1, 0, "Missing argument to function res[ize] x [y]" );
+			mvwprintw( windows.bottom, 0, 0, "Missing argument to function res[ize] x [y]" );
 		}
 		x = atoi( arg );
 		arg = strtok( nullptr, " " );
@@ -351,10 +380,10 @@ bool ConsoleRenderer::handleColon(){
 		else
 			y = atoi( arg );
 		map_layer.resize( x, y );
-		mvprintw( y_size - 1, 0, "Resized map to %ix%i", x, y );
+		mvwprintw( windows.bottom, 0, 0, "Resized map to %ix%i", x, y );
 		return false;
 	} else if( !strcmp( command, "help" )){
-		erase();
+		werase( windows.map );
 		constexpr int width = 97, height = 17;
 //		mvprintw(( y_size - height ) * 0.5, ( x_size - width ) * 0.5, "" );
 		static const std::vector<const char*> lines{
@@ -378,11 +407,12 @@ bool ConsoleRenderer::handleColon(){
 		};
 
 		for( size_t i = 0; i < lines.size(); ++i ){
-			mvprintw(( y_size - height ) * 0.5 + i, ( x_size - width ) * 0.5, "%s", lines[i] );
+			mvwprintw( windows.map, ( windows.map.y_size - height ) * 0.5 + i, ( windows.map.x_size - width ) * 0.5, "%s", lines[i] );
 		}
+		wrefresh( windows.map );
 		return false;
 	} else {
-		mvprintw( y_size - 1, 0, "Unrecognized command %s", command );
+		mvwprintw( windows.bottom, 0, 0, "Unrecognized command %s", command );
 		return false;
 	}
 }
@@ -399,7 +429,7 @@ const char* Pathfinder::ModeToString( Mode m ){
 			return "Exec";
 	}
 
-	throw std::runtime_error( "Invalid mode: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));
+	throw std::runtime_error( "Invalid mode a: " + std::to_string( static_cast<std::underlying_type_t<Mode>>( m )));
 }
 
 short Pathfinder::ModeToColor( Mode m ){

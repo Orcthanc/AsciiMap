@@ -3,5 +3,5 @@
 using namespace Pathfinder;
 
 void CommandList::registerAll(){
-	
+	//TODO
 }

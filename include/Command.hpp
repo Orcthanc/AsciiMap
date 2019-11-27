@@ -41,23 +41,22 @@ namespace Pathfinder {
 			}
 
 			template<typename T, typename ...Args>
-			auto find_and_call( const T&& name, Args... args )
+			auto find_and_call( Mode m, T&& name, size_t argc, Args... args )
 					-> std::enable_if_t<std::is_convertible_v<T, std::string>, cmd_ret_t>{
-				auto t = cmd_to_id.find( std::forward( name ));
+				auto t = cmd_to_id.find( mangle( m, std::forward( name ), argc ));
 				if( t == cmd_to_id.end())
 					return { false, false, "Could not find command :\"" + name + "\"" };
 
 				return ( void (*)( Args... ))( commands.find( t->second )->second())( std::forward<Args>( args )... );
 			}
 
-			//TODO google
 			template<typename T, typename ...Args>
 			cmd_ret_t find_and_call( function_id_t id, Args... args ){
 				return ( void (*)( Args... ))( commands.find( id )->second())( std::forward<Args>( args )... );
 			}
 
-			inline insert_command_t modify( const std::string& s ){
-				return { this, cmd_to_id.find( s )->second };
+			inline insert_command_t modify( Mode m, const std::string& s, size_t argc ){
+				return { this, cmd_to_id.find( mangle( m, s, argc ))->second };
 			}
 
 			void alias( function_id_t id, Mode m, std::string a, size_t argc );
