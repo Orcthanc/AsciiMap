@@ -6,6 +6,8 @@
 #include "Map.hpp"
 
 namespace Pathfinder {
+	struct Commands;
+
 	enum class Mode {
 		None,	//On startup when no file is open
 		View,	//Self explanatory
@@ -76,8 +78,6 @@ namespace Pathfinder {
 
 			void operator()();
 
-
-		private:
 			void drawMapLayer();
 			void drawFooter();
 			void handleUserInput();
@@ -91,5 +91,7 @@ namespace Pathfinder {
 			char input[MAX_INPUT_SIZE];
 			Mode mode;
 			Windows windows;
+			std::string filename;
+
 	};
 }

@@ -15,9 +15,7 @@ namespace Pathfinder {
 			}
 
 			Commands commands;
-			Map* curr_map;
-			MapLayer* curr_layer;
-			std::string filename;
+			ConsoleRenderer* renderer;
 		private:
 			static GlobalData data;
 	};

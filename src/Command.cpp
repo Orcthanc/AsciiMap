@@ -2,13 +2,13 @@
 
 using namespace Pathfinder;
 
-insert_command_t& insert_command_t::alias( Mode m, std::string s, size_t argc ){
-	cmds->alias( cmd, m, std::move( s ), argc );
+insert_command_t& insert_command_t::alias( Mode m, std::string s ){
+	cmds->alias( cmd, m, std::move( s ));
 	return *this;
 }
 
-void Commands::alias( function_id_t id, Mode m, std::string s, size_t argc ){
-	cmd_to_id.insert({ mangle( m, std::move( s ), argc ), id });
+void Commands::alias( function_id_t id, Mode m, std::string s ){
+	cmd_to_id.insert({ mangle( m, std::move( s )), id });
 }
 
 insert_command_t& insert_command_t::help( std::string s ){

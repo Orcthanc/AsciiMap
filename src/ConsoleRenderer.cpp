@@ -33,7 +33,8 @@ ConsoleRenderer::ConsoleRenderer( MapLayer&& ml ):
 		y_offset( 0 ),
 		scale( 4 ),
 		running( true ),
-		mode( Mode::None )
+		mode( Mode::None ),
+		filename()
 		{
 
 	setlocale( LC_ALL, "" );
@@ -66,7 +67,7 @@ ConsoleRenderer::~ConsoleRenderer(){
 }
 
 void ConsoleRenderer::operator()(){
-
+	GlobalData::get()->renderer = this;
 	refresh();
 
 #define COL( i ) ( i * 1000 / 0xff )
@@ -225,8 +226,8 @@ void ConsoleRenderer::drawFooter(){
 			break;
 
 	}
-	wprintw( windows.infobar, " %s", GlobalData::get()->filename == "" ? "[New file]" : GlobalData::get()->filename.c_str());
-	x += GlobalData::get()->filename.empty() ? 10 : snprintf( nullptr, 0, " %s", GlobalData::get()->filename.c_str() );
+	wprintw( windows.infobar, " %s", filename == "" ? "[New file]" : filename.c_str());
+	x += filename.empty() ? 10 : snprintf( nullptr, 0, " %s", filename.c_str() );
 
 	wprintw( windows.infobar, "% *s", x_size - x + 2, "" );
 
@@ -339,6 +340,22 @@ bool ConsoleRenderer::handleColon(){
 	curs_set( 0 );
 	char* command = strtok( input, " " );
 
+	char* temp;
+	std::vector<const char*> args;
+
+	while(( temp = strtok( nullptr, " " ))){
+		args.push_back( temp );
+	}
+
+	auto t = GlobalData::get()->commands.find_and_call( Mode::Exec, command, args );
+
+	mvwprintw( windows.bottom, 0, 0, "%s", t.message.c_str() );
+	wrefresh( windows.bottom );
+
+	return t.redraw && t.success;
+
+	/*
+
 	if( command == nullptr )
 		return false;
 	else if( !strcmp( command, "write" ) || !strcmp( command, "w" )){
@@ -399,9 +416,8 @@ bool ConsoleRenderer::handleColon(){
 	} else if( !strcmp( command, "help" )){
 		werase( windows.map );
 		constexpr int width = 97, height = 17;
-//		mvprintw(( y_size - height ) * 0.5, ( x_size - width ) * 0.5, "" );
 		static const std::vector<const char*> lines{
-				"MapViewer written by Orcthanc Version " VERSION "",
+				"MapViewer written by Orcthanc Version " VERSION,
 				"",
 				"Available commands:",
 				" - w                          Move the map up one char",
@@ -413,9 +429,9 @@ bool ConsoleRenderer::handleColon(){
 				" - d                          Move the map right one char",
 				" - right_arrow                See above",
 				" - :help                      Displays this help",
-				" - :w[rite] [filename]        Saves the map to filename, or the last opened file if none specified",
+	/			" - :w[rite] [filename]        Saves the map to filename, or the last opened file if none specified",
 				" - :vie[w] [filename]         Switches to view-mode and opens filename if given",
-				" - :e[dit] [filename]         Switches to edit-mode and opens filename if given",
+	/			" - :e[dit] [filename]         Switches to edit-mode and opens filename if given",
 				" - :ene[w]                    Switches to edit-mode and creates a new map",
 				" - :res[ize] x [y]            Resizes the map-layer to the dimension x*y",
 		};
@@ -429,6 +445,7 @@ bool ConsoleRenderer::handleColon(){
 		mvwprintw( windows.bottom, 0, 0, "Unrecognized command %s", command );
 		return false;
 	}
+	*/
 }
 
 const char* Pathfinder::ModeToString( Mode m ){
